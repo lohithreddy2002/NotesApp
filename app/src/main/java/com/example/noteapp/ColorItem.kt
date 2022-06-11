@@ -38,14 +38,14 @@ fun ColorItem(
             .clickable(onClick = onClick)
     ) {
         if (color != null) {
-            // Transparent background pattern
+
             Box(
                 modifier = Modifier
                     .width(20.dp)
                     .fillMaxHeight()
                     .background(grey400)
             )
-            // Color indicator
+
             val colorModifier =
                 if (color.luminance() < 0.1 || color.luminance() > 0.9) {
                     Modifier

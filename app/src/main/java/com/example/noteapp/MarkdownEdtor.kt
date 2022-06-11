@@ -1,33 +1,32 @@
 package com.example.noteapp
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,9 +35,7 @@ import coil.size.OriginalSize
 import com.example.noteapp.ui.theme.NoteAppTheme
 import org.commonmark.node.*
 import org.commonmark.node.Paragraph
-import org.commonmark.node.Text
 import org.commonmark.parser.Parser
-import org.intellij.lang.annotations.Language
 
 
 private const val TAG_URL = "url"
@@ -307,73 +304,93 @@ fun MarkdownText(text: AnnotatedString, style: TextStyle, modifier: Modifier = M
     )
 }
 
-@Preview
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextEditorPreview() {
     val parser = Parser.builder().build()
-    val root = parser.parse(MIXED_MD) as Document
-    val render by remember { mutableStateOf(false) }
-    NoteAppTheme {
-        Surface() {
-            Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    if (render) {
-                        MDDocument(root)
-                    } else {
-                        Text(MIXED_MD)
-                    }
+    var text by remember {
+        mutableStateOf("")
+    }
+    var editing by remember { mutableStateOf(true) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    var blackClick by remember {
+        mutableStateOf(false)
+    }
+    Column {
+        Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceAround) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { }) {
+                Text(text = "submit")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                editing = !editing
+                keyboard?.hide()
+            }) {
+                if (editing) {
+                    Text(text = "check")
+                } else {
+                    Text(text = "Edit")
+
                 }
+
+            }
+            ColorItem(selected = blackClick, color = Color.Yellow) {
+                blackClick = !blackClick
+            }
+            ColorItem(selected = blackClick, color = Color.Red) {
+                blackClick = !blackClick
+            }
+            ColorItem(selected = blackClick, color = Color.Magenta) {
+                blackClick = !blackClick
+            }
+            ColorItem(selected = blackClick, color = Color.Green) {
+                blackClick = !blackClick
+            }
+        }
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+                .border(
+                    1.dp, Color.Gray,
+                    RoundedCornerShape(topStartPercent = 10, topEndPercent = 10)
+                )
+                .padding(8.dp)
+                .fillMaxWidth()
+        ) {
+            if (editing) {
+                BasicTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    keyboardOptions = KeyboardOptions(
+                        autoCorrect = true,
+                        keyboardType = KeyboardType.Text
+                    ),
+                    decorationBox = {
+                        if (text == "") {
+                            Text(text = "Your Note")
+                        }
+                        it()
+                    }
+                )
+            } else {
+                val root = parser.parse(text) as Document
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    MDDocument(root)
+                }
+
             }
         }
     }
 }
 
-@Language("Markdown")
-const val MIXED_MD = """
-### Markdown Header
 
-This is regular text without formatting in a single paragraph.
-
-![Serious](file:///android_asset/serios.jpg)
-
-Images can also be inline: ![Serious](file:///android_asset/serios.jpg). [Links](http://hellsoft.se) and `inline code` also work. This *is* text __with__ inline styles for *__bold and italic__*. Those can be nested.
-
-Here is a code block:
-```javascript
-function codeBlock() {
-    return true;
+@Preview
+@Composable
+fun EditorPreview() {
+    NoteAppTheme() {
+        Surface {
+            TextEditorPreview()
+        }
+    }
 }
-```
-
-+ Bullet
-+ __Lists__
-+ Are
-+ *Cool*
-
-1. **First**
-1. *Second*
-1. Third
-1. [Fourth is clickable](https://google.com)  
-   1. And
-   1. Sublists
-1. Mixed
-   - With
-   - Bullet
-   - Lists
-
-100) Lists
-100) Can
-100) Have
-100) *Custom*
-100) __Start__
-100) Numbers
-
-- List
-- Of
-- Items
-  - With
-  - Sublist
-
-> A blockquote is useful for quotes!
-
-"""

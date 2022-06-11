@@ -9,3 +9,7 @@ val Teal200 = Color(0xFF03DAC5)
 val grey400 = Color(0xFFBDBDBD)
 val blackAlpha20 = Color(0x33000000)
 val whiteAlpha20 = Color(0x33FFFFFF)
+val Yellow = Color.Yellow
+val Red = Color.Red
+val Magenta = Color.Magenta
+val Green = Color.Green
