@@ -16,7 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -25,6 +27,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.noteapp.data.NotesItem
 import com.example.noteapp.ui.theme.NoteAppTheme
 import kotlinx.coroutines.launch
@@ -35,13 +40,10 @@ import kotlin.math.roundToInt
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun NotesScreen() {
+fun NotesScreen(viewModel: NotesScreenViewModel, navController: NavController) {
     val state = rememberScaffoldState()
-    val list = mutableListOf<NotesItem>()
     val scope = rememberCoroutineScope()
-    for (i in 1..4) {
-        list.add(NotesItem(noteDesc = "Description is $i", noteTitle = "$i", noteColorCode = i))
-    }
+    val screenState = viewModel.allNotes.collectAsState()
     Scaffold(topBar = {
         TopAppBar(title = { Text(text = "Notes") }, navigationIcon = {
             IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
@@ -56,7 +58,19 @@ fun NotesScreen() {
         .fillMaxWidth()
         .background(Color.White)
     ) { i ->
-        NotesList(list = list)
+        Box() {
+            NotesList(list = screenState.value.notesList)
+            FloatingActionButton(
+                onClick = { navController.navigate("editor") }, modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_add_24),
+                    contentDescription = ""
+                )
+            }
+        }
     }
 }
 
@@ -162,8 +176,9 @@ fun NormalItemPreview() {
 @Composable
 fun NotesScreenPreview() {
     NoteAppTheme {
+        val navController = rememberNavController()
         Surface {
-            NotesScreen()
+            NotesScreen(navController = navController, viewModel = viewModel())
         }
     }
 }

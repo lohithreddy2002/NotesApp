@@ -19,24 +19,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.noteapp.ui.theme.NoteAppTheme
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditorScreen(viewModel: EditorViewModel = viewModel()) {
+fun EditorScreen(viewModel: EditorViewModel, navController: NavController) {
     val editorState = viewModel.editorStateFlow.collectAsState()
     val parser = Parser.builder().build()
     var text by remember {
         mutableStateOf("")
+    }
+    if (editorState.value.noteAdded) {
+
     }
     val keyboard = LocalSoftwareKeyboardController.current
     Column {
         Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceAround) {
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
-                viewModel.createNote()
+                viewModel.createNote(text)
             }, enabled = !editorState.value.loading) {
                 Text(text = "Submit")
             }
@@ -113,7 +118,7 @@ fun EditorScreen(viewModel: EditorViewModel = viewModel()) {
 fun EditorPreview() {
     NoteAppTheme() {
         Surface {
-            EditorScreen()
+            EditorScreen(navController = rememberNavController(), viewModel = viewModel())
         }
     }
 }
