@@ -1,41 +1,36 @@
 package com.example.noteapp
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Colors
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.size.OriginalSize
-import com.example.noteapp.ui.theme.NoteAppTheme
 import org.commonmark.node.*
 import org.commonmark.node.Paragraph
-import org.commonmark.parser.Parser
 
 
 private const val TAG_URL = "url"
@@ -49,9 +44,9 @@ fun MDDocument(document: Document) {
 @Composable
 fun MDHeading(heading: Heading, modifier: Modifier = Modifier) {
     val style = when (heading.level) {
-        1 -> MaterialTheme.typography.h1
-        2 -> MaterialTheme.typography.h2
-        3 -> MaterialTheme.typography.h3
+        1 -> MaterialTheme.typography.h3
+        2 -> MaterialTheme.typography.h3
+        3 -> MaterialTheme.typography.h4
         4 -> MaterialTheme.typography.h4
         5 -> MaterialTheme.typography.h5
         6 -> MaterialTheme.typography.h6
@@ -80,11 +75,11 @@ fun MDParagraph(paragraph: Paragraph, modifier: Modifier = Modifier) {
         val padding = if (paragraph.parent is Document) 8.dp else 0.dp
         Box(modifier = modifier.padding(bottom = padding)) {
             val styledText = buildAnnotatedString {
-                pushStyle(MaterialTheme.typography.body1.toSpanStyle())
+                pushStyle(MaterialTheme.typography.body2.toSpanStyle())
                 appendMarkdownChildren(paragraph, MaterialTheme.colors)
                 pop()
             }
-            MarkdownText(styledText, MaterialTheme.typography.body1)
+            MarkdownText(styledText, MaterialTheme.typography.body2)
         }
     }
 }
@@ -300,97 +295,7 @@ fun MarkdownText(text: AnnotatedString, style: TextStyle, modifier: Modifier = M
 
             }
         ),
-        onTextLayout = { layoutResult.value = it }
+        onTextLayout = { layoutResult.value = it },
+        overflow = TextOverflow.Ellipsis
     )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun TextEditorPreview() {
-    val parser = Parser.builder().build()
-    var text by remember {
-        mutableStateOf("")
-    }
-    var editing by remember { mutableStateOf(true) }
-    val keyboard = LocalSoftwareKeyboardController.current
-    var blackClick by remember {
-        mutableStateOf(false)
-    }
-    Column {
-        Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceAround) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = { }) {
-                Text(text = "submit")
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                editing = !editing
-                keyboard?.hide()
-            }) {
-                if (editing) {
-                    Text(text = "check")
-                } else {
-                    Text(text = "Edit")
-
-                }
-
-            }
-            ColorItem(selected = blackClick, color = Color.Yellow) {
-                blackClick = !blackClick
-            }
-            ColorItem(selected = blackClick, color = Color.Red) {
-                blackClick = !blackClick
-            }
-            ColorItem(selected = blackClick, color = Color.Magenta) {
-                blackClick = !blackClick
-            }
-            ColorItem(selected = blackClick, color = Color.Green) {
-                blackClick = !blackClick
-            }
-        }
-        Box(
-            modifier = Modifier
-                .padding(start = 8.dp, end = 8.dp)
-                .border(
-                    1.dp, Color.Gray,
-                    RoundedCornerShape(topStartPercent = 10, topEndPercent = 10)
-                )
-                .padding(8.dp)
-                .fillMaxWidth()
-        ) {
-            if (editing) {
-                BasicTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    keyboardOptions = KeyboardOptions(
-                        autoCorrect = true,
-                        keyboardType = KeyboardType.Text
-                    ),
-                    decorationBox = {
-                        if (text == "") {
-                            Text(text = "Your Note")
-                        }
-                        it()
-                    }
-                )
-            } else {
-                val root = parser.parse(text) as Document
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    MDDocument(root)
-                }
-
-            }
-        }
-    }
-}
-
-
-@Preview
-@Composable
-fun EditorPreview() {
-    NoteAppTheme() {
-        Surface {
-            TextEditorPreview()
-        }
-    }
 }

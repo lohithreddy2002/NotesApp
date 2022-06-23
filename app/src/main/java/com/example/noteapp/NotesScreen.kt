@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteCutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -42,17 +43,15 @@ fun NotesScreen() {
         list.add(NotesItem(noteDesc = "Description is $i", noteTitle = "$i", noteColorCode = i))
     }
     Scaffold(topBar = {
-        TopAppBar(title = { androidx.compose.material.Text(text = "Notes") }, navigationIcon = {
+        TopAppBar(title = { Text(text = "Notes") }, navigationIcon = {
             IconButton(onClick = { scope.launch { state.drawerState.open() } }) {
                 Icon(Icons.Filled.Menu, contentDescription = null)
             }
         })
     }, scaffoldState = state, drawerContent = {
-        androidx.compose.material.Text(text = "Drawer opened")
+        Text(text = "Drawer opened")
     }, bottomBar = {
-        BottomAppBar() {
-//        Icon(painter = painterResource(id = android.R.drawable.btn_star), contentDescription = "")
-        }
+
     }, modifier = Modifier
         .fillMaxWidth()
         .background(Color.White)
@@ -66,7 +65,7 @@ fun NotesScreen() {
 fun NotesList(list: List<NotesItem>) {
     LazyColumn(Modifier.fillMaxSize()) {
         items(list) {
-            NoteItem(it)
+            NormalNoteItem(it)
         }
     }
 }
@@ -129,6 +128,35 @@ fun NoteItem(notesItem: NotesItem) {
     }
 }
 
+
+@Composable
+fun NormalNoteItem(notesItem: NotesItem) {
+    val parser = Parser.builder().build()
+    val root = parser.parse(MIXED_MD) as Document
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .padding(10.dp)
+            .clip(RoundedCornerShape(10))
+            .background(Color.Red)
+    ) {
+        Column(modifier = Modifier.padding(10.dp)) {
+            MDDocument(document = root)
+        }
+    }
+}
+
+
+@Preview
+@Composable
+fun NormalItemPreview() {
+    NoteAppTheme {
+        Surface {
+            NormalNoteItem(NotesItem(1, "", "", 1))
+        }
+    }
+}
 
 @Preview("Notes Screen", uiMode = UI_MODE_NIGHT_YES)
 @Composable
