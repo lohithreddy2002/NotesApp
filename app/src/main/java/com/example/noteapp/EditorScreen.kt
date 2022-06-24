@@ -1,5 +1,8 @@
 package com.example.noteapp
 
+import android.content.Context
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,10 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,21 +32,34 @@ import org.commonmark.parser.Parser
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditorScreen(viewModel: EditorViewModel, navController: NavController) {
+fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: Int? = null) {
     val editorState = viewModel.editorStateFlow.collectAsState()
     val parser = Parser.builder().build()
     var text by remember {
         mutableStateOf("")
     }
+    if (id != null) {
+        viewModel.getSingleNoteItem(id)
+        val item = viewModel.itemFlow.collectAsState()
+        text = item.value.item?.noteDesc.toString()
+        viewModel.changeSelectedColor(item.value.item?.noteColorCode?.plus(1) ?: 0)
+    }
+    val context = LocalContext.current
     if (editorState.value.noteAdded) {
-
+        navController.navigateUp()
     }
     val keyboard = LocalSoftwareKeyboardController.current
+    val state = rememberScaffoldState()
     Column {
         Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceAround) {
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
-                viewModel.createNote(text)
+                if (editorState.value.selectedColor != 0) {
+                    viewModel.createNote(text)
+                } else {
+                    showToast(context, "Select any one of the Colors")
+                }
+
             }, enabled = !editorState.value.loading) {
                 Text(text = "Submit")
             }
@@ -112,6 +130,11 @@ fun EditorScreen(viewModel: EditorViewModel, navController: NavController) {
     }
 }
 
+fun showToast(context: Context, message: String) {
+    val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+    toast.setGravity(Gravity.BOTTOM, 0, 0)
+    toast.show()
+}
 
 @Preview
 @Composable

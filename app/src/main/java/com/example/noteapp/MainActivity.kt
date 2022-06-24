@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.noteapp.ui.theme.NoteAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,9 +37,11 @@ class MainActivity : ComponentActivity() {
                             val viewModel = hiltViewModel<NotesScreenViewModel>()
                             NotesScreen(viewModel, navController)
                         }
-                        composable("editor") {
+                        composable("editor/{noteItem}", arguments = listOf(navArgument("noteItem") {
+                            type = NavType.IntType
+                        })) {
                             val viewModel = hiltViewModel<EditorViewModel>()
-                            EditorScreen(viewModel, navController)
+                            EditorScreen(viewModel, navController, it.arguments?.getInt("noteItem"))
                         }
                         /*...*/
                     }

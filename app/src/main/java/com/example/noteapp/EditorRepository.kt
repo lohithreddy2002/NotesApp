@@ -15,4 +15,8 @@ class EditorRepository @Inject constructor(val dao: NotesDao) {
         }
     }
 
+    suspend fun getSingleNote(id: Int): NotesItem {
+        return dao.getSingleNote(id)
+    }
+
 }

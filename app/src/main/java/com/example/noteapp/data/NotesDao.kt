@@ -15,5 +15,8 @@ interface NotesDao {
     suspend fun deleteNotes(item: NotesItem)
 
     @Insert
-    suspend fun addNotes(item: NotesItem):Long
+    suspend fun addNotes(item: NotesItem): Long
+
+    @Query("SELECT * FROM notes WHERE id = :id")
+    suspend fun getSingleNote(id: Int): NotesItem
 }

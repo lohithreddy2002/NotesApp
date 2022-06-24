@@ -3,6 +3,7 @@ package com.example.noteapp
 import android.annotation.SuppressLint
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,14 +53,14 @@ fun NotesScreen(viewModel: NotesScreenViewModel, navController: NavController) {
         })
     }, scaffoldState = state, drawerContent = {
         Text(text = "Drawer opened")
-    }, bottomBar = {
-
     }, modifier = Modifier
         .fillMaxWidth()
         .background(Color.White)
     ) { i ->
         Box() {
-            NotesList(list = screenState.value.notesList)
+            NotesList(list = screenState.value.notesList) {
+                navController.navigate("editor/${it.id}")
+            }
             FloatingActionButton(
                 onClick = { navController.navigate("editor") }, modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -76,10 +77,12 @@ fun NotesScreen(viewModel: NotesScreenViewModel, navController: NavController) {
 
 
 @Composable
-fun NotesList(list: List<NotesItem>) {
+fun NotesList(list: List<NotesItem>, onclick: (NotesItem) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()) {
         items(list) {
-            NormalNoteItem(it)
+            NormalNoteItem(it) {
+                onclick(it)
+            }
         }
     }
 }
@@ -144,16 +147,19 @@ fun NoteItem(notesItem: NotesItem) {
 
 
 @Composable
-fun NormalNoteItem(notesItem: NotesItem) {
+fun NormalNoteItem(notesItem: NotesItem, onclick: (NotesItem) -> Unit) {
     val parser = Parser.builder().build()
-    val root = parser.parse(MIXED_MD) as Document
+    val root = parser.parse(notesItem.noteDesc) as Document
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
             .padding(10.dp)
             .clip(RoundedCornerShape(10))
-            .background(Color.Red)
+            .background(NotesItem.colorList[notesItem.noteColorCode])
+            .clickable {
+                onclick(notesItem)
+            }
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             MDDocument(document = root)
@@ -167,7 +173,7 @@ fun NormalNoteItem(notesItem: NotesItem) {
 fun NormalItemPreview() {
     NoteAppTheme {
         Surface {
-            NormalNoteItem(NotesItem(1, "", "", 1))
+            NormalNoteItem(NotesItem(1, "", "", 1)) {}
         }
     }
 }
@@ -188,7 +194,7 @@ fun NotesScreenPreview() {
 fun NotesListPreview() {
     NoteAppTheme {
         Surface {
-            NotesList(listOf())
+            NotesList(listOf(), {})
         }
     }
 }

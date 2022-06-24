@@ -10,10 +10,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EditorViewModel @Inject constructor(val repository: EditorRepository) : ViewModel() {
+class EditorViewModel @Inject constructor(private val repository: EditorRepository) : ViewModel() {
 
     private val _editorStateFlow = MutableStateFlow(EditorState())
     val editorStateFlow = _editorStateFlow.asStateFlow()
+
+    private val _itemFlow = MutableStateFlow(ItemState())
+    val itemFlow = _itemFlow.asStateFlow()
 
     fun createNote(text: String) {
         _editorStateFlow.value = _editorStateFlow.value.copy(loading = true)
@@ -25,6 +28,7 @@ class EditorViewModel @Inject constructor(val repository: EditorRepository) : Vi
             )
             repository.addNote(item)
         }
+        _editorStateFlow.value = _editorStateFlow.value.copy(noteAdded = true)
     }
 
     fun changeSelectedColor(id: Int) {
@@ -37,6 +41,13 @@ class EditorViewModel @Inject constructor(val repository: EditorRepository) : Vi
 
     }
 
+    fun getSingleNoteItem(id: Int) {
+        viewModelScope.launch {
+            val item = repository.getSingleNote(id)
+            _itemFlow.value = _itemFlow.value.copy(item = item)
+        }
+    }
+
 
 }
 
@@ -47,4 +58,8 @@ data class EditorState(
     val selectedColor: Int = 0,
     val noteAdded: Boolean = false
 
+)
+
+data class ItemState(
+    val item: NotesItem? = null
 )
