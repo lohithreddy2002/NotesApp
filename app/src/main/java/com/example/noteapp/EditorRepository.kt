@@ -19,4 +19,10 @@ class EditorRepository @Inject constructor(val dao: NotesDao) {
         return dao.getSingleNote(id)
     }
 
+    suspend fun updateNote(item: NotesItem) {
+        withContext(Dispatchers.IO) {
+            dao.updateNote(item)
+        }
+    }
+
 }

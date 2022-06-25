@@ -18,11 +18,11 @@ class EditorViewModel @Inject constructor(private val repository: EditorReposito
     private val _itemFlow = MutableStateFlow(ItemState())
     val itemFlow = _itemFlow.asStateFlow()
 
-    fun createNote(text: String) {
+    fun createNote() {
         _editorStateFlow.value = _editorStateFlow.value.copy(loading = true)
         viewModelScope.launch {
             val item = NotesItem(
-                noteDesc = text,
+                noteDesc = _editorStateFlow.value.noteText,
                 noteTitle = "",
                 noteColorCode = _editorStateFlow.value.selectedColor - 1
             )
@@ -44,8 +44,30 @@ class EditorViewModel @Inject constructor(private val repository: EditorReposito
     fun getSingleNoteItem(id: Int) {
         viewModelScope.launch {
             val item = repository.getSingleNote(id)
-            _itemFlow.value = _itemFlow.value.copy(item = item)
+            _editorStateFlow.value = _editorStateFlow.value.copy(
+                selectedColor = item.noteColorCode + 1,
+                noteText = item.noteDesc
+            )
         }
+    }
+
+    fun changeText(text: String) {
+        _editorStateFlow.value = _editorStateFlow.value.copy(noteText = text)
+    }
+
+    fun updateNote(id: Int) {
+        _editorStateFlow.value = _editorStateFlow.value.copy(loading = true)
+        viewModelScope.launch {
+            repository.updateNote(
+                NotesItem(
+                    id,
+                    noteDesc = _editorStateFlow.value.noteText,
+                    noteTitle = "",
+                    noteColorCode = _editorStateFlow.value.selectedColor - 1
+                )
+            )
+        }
+        _editorStateFlow.value = _editorStateFlow.value.copy(noteAdded = true)
     }
 
 
@@ -56,7 +78,8 @@ data class EditorState(
     val isEditing: Boolean = true,
     val loading: Boolean = false,
     val selectedColor: Int = 0,
-    val noteAdded: Boolean = false
+    val noteAdded: Boolean = false,
+    val noteText: String = ""
 
 )
 

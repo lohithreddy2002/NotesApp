@@ -33,6 +33,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.noteapp.data.NotesItem
 import com.example.noteapp.ui.theme.NoteAppTheme
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.shimmer
 import kotlinx.coroutines.launch
 import org.commonmark.node.Document
 import org.commonmark.parser.Parser
@@ -79,9 +82,15 @@ fun NotesScreen(viewModel: NotesScreenViewModel, navController: NavController) {
 @Composable
 fun NotesList(list: List<NotesItem>, onclick: (NotesItem) -> Unit) {
     LazyColumn(Modifier.fillMaxSize()) {
-        items(list) {
-            NormalNoteItem(it) {
-                onclick(it)
+        if (list.isNotEmpty()) {
+            items(list) {
+                NormalNoteItem(notesItem = it, visible = false, onclick = {
+                    onclick(it)
+                })
+            }
+        } else {
+            items(5) {
+                NormalNoteItem(notesItem = NotesItem(1, "", "", 1), {})
             }
         }
     }
@@ -147,7 +156,7 @@ fun NoteItem(notesItem: NotesItem) {
 
 
 @Composable
-fun NormalNoteItem(notesItem: NotesItem, onclick: (NotesItem) -> Unit) {
+fun NormalNoteItem(notesItem: NotesItem, onclick: (NotesItem) -> Unit, visible: Boolean = true) {
     val parser = Parser.builder().build()
     val root = parser.parse(notesItem.noteDesc) as Document
     Box(
@@ -160,6 +169,10 @@ fun NormalNoteItem(notesItem: NotesItem, onclick: (NotesItem) -> Unit) {
             .clickable {
                 onclick(notesItem)
             }
+            .placeholder(
+                visible = visible,
+                highlight = PlaceholderHighlight.shimmer(highlightColor = Color.White)
+            )
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             MDDocument(document = root)
@@ -173,7 +186,7 @@ fun NormalNoteItem(notesItem: NotesItem, onclick: (NotesItem) -> Unit) {
 fun NormalItemPreview() {
     NoteAppTheme {
         Surface {
-            NormalNoteItem(NotesItem(1, "", "", 1)) {}
+            NormalNoteItem(NotesItem(1, "", "", 1), {})
         }
     }
 }

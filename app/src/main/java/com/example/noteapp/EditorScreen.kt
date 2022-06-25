@@ -13,8 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,27 +36,26 @@ import org.commonmark.parser.Parser
 fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: Int? = null) {
     val editorState = viewModel.editorStateFlow.collectAsState()
     val parser = Parser.builder().build()
-    var text by remember {
-        mutableStateOf("")
-    }
     if (id != null) {
-        viewModel.getSingleNoteItem(id)
-        val item = viewModel.itemFlow.collectAsState()
-        text = item.value.item?.noteDesc.toString()
-        viewModel.changeSelectedColor(item.value.item?.noteColorCode?.plus(1) ?: 0)
+        LaunchedEffect(Unit) {
+            viewModel.getSingleNoteItem(id)
+        }
     }
     val context = LocalContext.current
     if (editorState.value.noteAdded) {
         navController.navigateUp()
     }
     val keyboard = LocalSoftwareKeyboardController.current
-    val state = rememberScaffoldState()
     Column {
         Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.SpaceAround) {
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 if (editorState.value.selectedColor != 0) {
-                    viewModel.createNote(text)
+                    if (id == null) {
+                        viewModel.createNote()
+                    } else {
+                        viewModel.updateNote(id)
+                    }
                 } else {
                     showToast(context, "Select any one of the Colors")
                 }
@@ -101,14 +101,14 @@ fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: I
         ) {
             if (editorState.value.isEditing) {
                 BasicTextField(
-                    value = text,
-                    onValueChange = { text = it },
+                    value = editorState.value.noteText,
+                    onValueChange = { viewModel.changeText(it) },
                     keyboardOptions = KeyboardOptions(
                         autoCorrect = true,
                         keyboardType = KeyboardType.Text
                     ),
                     decorationBox = {
-                        if (text == "") {
+                        if (editorState.value.noteText == "") {
                             Text(text = "Your Note")
                         }
                         it()
@@ -116,11 +116,11 @@ fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: I
                 )
             } else {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    if (text == "") {
+                    if (editorState.value.noteText == "") {
                         val root = parser.parse("### EMPTY") as Document
                         MDDocument(root)
                     } else {
-                        val root = parser.parse(text) as Document
+                        val root = parser.parse(editorState.value.noteText) as Document
                         MDDocument(root)
                     }
                 }

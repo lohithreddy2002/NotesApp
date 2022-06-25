@@ -1,9 +1,6 @@
 package com.example.noteapp.data
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,4 +16,8 @@ interface NotesDao {
 
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getSingleNote(id: Int): NotesItem
+
+    @Update
+    fun updateNote(note: NotesItem)
+
 }

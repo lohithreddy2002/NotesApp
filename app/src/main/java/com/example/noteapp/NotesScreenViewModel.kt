@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.noteapp.data.NotesItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -19,16 +20,17 @@ class NotesScreenViewModel @Inject constructor(private val repository: NotesScre
 
     init {
         viewModelScope.launch {
+            delay(2000)
             repository.dao.getNotes().collectLatest {
-                _allNotes.value = _allNotes.value.copy(notesList = it)
+                _allNotes.value = _allNotes.value.copy(isLoading = false, notesList = it)
             }
-        }
-    }
 
+        }
+
+    }
 }
 
-
 data class NotesScreenState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val notesList: List<NotesItem> = listOf()
 )
