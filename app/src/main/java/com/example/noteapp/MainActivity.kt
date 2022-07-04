@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -42,6 +43,8 @@ class MainActivity : ComponentActivity() {
                                 AnimatedContentScope.SlideDirection.Right,
                                 animationSpec = tween(600)
                             )
+                        }, exitTransition = {
+                            fadeOut(animationSpec = tween(1000))
                         }) {
                             val viewModel = hiltViewModel<NotesScreenViewModel>()
                             NotesScreen(viewModel, navController)
