@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -39,7 +38,10 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AnimatedNavHost(navController = navController, startDestination = "Home") {
                         composable("Home", enterTransition = {
-                            fadeIn(animationSpec = tween(2000))
+                            slideIntoContainer(
+                                AnimatedContentScope.SlideDirection.Right,
+                                animationSpec = tween(600)
+                            )
                         }) {
                             val viewModel = hiltViewModel<NotesScreenViewModel>()
                             NotesScreen(viewModel, navController)
@@ -48,8 +50,8 @@ class MainActivity : ComponentActivity() {
                             type = NavType.IntType
                         }), enterTransition = {
                             slideIntoContainer(
-                                AnimatedContentScope.SlideDirection.Right,
-                                animationSpec = tween(1000)
+                                AnimatedContentScope.SlideDirection.Left,
+                                animationSpec = tween(600)
                             )
                         }) {
                             val viewModel = hiltViewModel<EditorViewModel>()

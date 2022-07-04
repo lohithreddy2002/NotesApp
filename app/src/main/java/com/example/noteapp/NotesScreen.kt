@@ -65,7 +65,7 @@ fun NotesScreen(viewModel: NotesScreenViewModel, navController: NavController) {
                 navController.navigate("editor/${it.id}")
             }
             FloatingActionButton(
-                onClick = { navController.navigate("editor") }, modifier = Modifier
+                onClick = { navController.navigate("editor/0") }, modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(20.dp)
             ) {

@@ -36,9 +36,11 @@ import org.commonmark.parser.Parser
 fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: Int? = null) {
     val editorState = viewModel.editorStateFlow.collectAsState()
     val parser = Parser.builder().build()
-    if (id != null) {
+    if (id != 0) {
         LaunchedEffect(Unit) {
-            viewModel.getSingleNoteItem(id)
+            if (id != null) {
+                viewModel.getSingleNoteItem(id)
+            }
         }
     }
     val context = LocalContext.current
@@ -51,10 +53,12 @@ fun EditorScreen(viewModel: EditorViewModel, navController: NavController, id: I
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 if (editorState.value.selectedColor != 0) {
-                    if (id == null) {
+                    if (id == 0) {
                         viewModel.createNote()
                     } else {
-                        viewModel.updateNote(id)
+                        if (id != null) {
+                            viewModel.updateNote(id)
+                        }
                     }
                 } else {
                     showToast(context, "Select any one of the Colors")
